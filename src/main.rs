@@ -1,4 +1,4 @@
-use image::GenericImageView;
+use image::{GenericImageView, Rgba, Rgb};
 
 extern crate image;
 
@@ -14,22 +14,24 @@ fn main() {
     let (width, height) = input.dimensions();
     let mut output: image::RgbaImage = image::ImageBuffer::new(width, height);
     // encode_msg(&input.pixels(), msg);
-    for (x, y, rgba) in input.pixels() {
-        // [241, 226, 197, 255]
-        // println!("{:?}",rgba.0[2]);
-        output.put_pixel(x, y, rgba);
-    }
-    output.save(path.replace(".", "-out.")).unwrap();
+    // println!("{:?}", input.pixels());
+    // for mut i in input.pixels() {
+    //     i.2 = Rgba([i.2[0], i.2[1], i.2[3], i.2[4]]);
+    //     println!("{:?}", i.2);
+    // }
+    encode_msg(&mut input.pixels().collect(), msg);
+    input.save(path.replace(".", "-out.")).unwrap();
+    // output.save(path.replace(".", "-out.")).unwrap();
 }
 
-fn encode_msg(colors: &mut [u8], msg: &str) {
+fn encode_msg(colors: &mut Vec<(u32, u32, Rgba<u8>)>, msg: &str) {
     let msgBits = vec![get_bit_from_num(msg.len() as u32), get_msg_bit(msg)].concat() ;
     let mut history = vec![];
     let mut pos = 0;
     while pos < msgBits.len() {
         let mut loc = get_next_location(&mut history, colors.len() as u32);
         // colors[0];
-        colors[loc as usize] = set_bit(&colors[loc as usize], &0, &(msgBits[pos as usize] as u8));
+        let mut  target = &colors[loc as usize].2;
         while (loc + 1) % 4 != 0 {
             loc = loc + 1;
         }
