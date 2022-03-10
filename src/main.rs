@@ -15,10 +15,10 @@ fn main() {
     let mut output: image::RgbaImage = image::ImageBuffer::new(width, height);
     // encode_msg(&input.pixels(), msg);
     // println!("{:?}", input.pixels());
-    // for mut i in input.pixels() {
-    //     i.2 = Rgba([i.2[0], i.2[1], i.2[3], i.2[4]]);
-    //     println!("{:?}", i.2);
-    // }
+    for mut i in input.pixels() {
+        i.2 = Rgba([i.2[0], i.2[1], i.2[3], i.2[4]]);
+        println!("{:?}", i.2);
+    }
     encode_msg(&mut input.pixels().collect(), msg);
     input.save(path.replace(".", "-out.")).unwrap();
     // output.save(path.replace(".", "-out.")).unwrap();
@@ -31,11 +31,13 @@ fn encode_msg(colors: &mut Vec<(u32, u32, Rgba<u8>)>, msg: &str) {
     while pos < msgBits.len() {
         let mut loc = get_next_location(&mut history, colors.len() as u32);
         // colors[0];
-        let mut  target = &colors[loc as usize].2;
+        let mut  targetRgba = &colors[loc as usize].2;
+        targetRgba = &Rgba([targetRgba[0], targetRgba[1], targetRgba[2], targetRgba[3]]);
         while (loc + 1) % 4 != 0 {
             loc = loc + 1;
         }
-        colors[loc as usize] = 255;
+        // TODO
+        // colors[loc as usize] = 255;
         pos = pos +1;
     }
 }
