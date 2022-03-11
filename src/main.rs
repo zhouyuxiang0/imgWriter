@@ -12,22 +12,42 @@ fn main() {
     let mut output: image::RgbaImage = image::ImageBuffer::new(width, height);
     let mut image_vec: Vec<u8> = vec![];
     // let mut output_image_vec = vec![];
+    let mut num = 0;
     for (_, _, rgba) in input.pixels() {
+        num += 1;
         image_vec = vec![image_vec, rgba.0.to_vec()].concat();
     }
-    println!("{:?}", &image_vec[0..20]);
-    let mut history: Vec<u32> = vec![];
-    let mut pos = 0;
-    while pos < message_bits.len() {
-        let mut loc = get_next_location(&mut history, image_vec.len() as u32);
-        image_vec[loc as usize] = set_bit(&(image_vec[loc as usize] as u8), &0, &(message_bits[pos as usize] as u8));
-        while ((loc + 1) % 4) != 0 {
-            loc+=1;
-        }
-        image_vec[loc as usize] = 255;
-        pos+=1;
-    }
-    println!("{:?}", &image_vec[0..20]);
+    println!("{}", num);
+    println!("{}", image_vec.len());
+    // let mut history: Vec<u32> = vec![];
+    // let mut pos = 0;
+    // let msg_bit_len = message_bits.len();
+    // while pos < msg_bit_len {
+    //     let mut loc = get_next_location(&mut history, image_vec.len() as u32);
+    //     image_vec[loc as usize] = set_bit(&(image_vec[loc as usize] as u8), &0, &(message_bits[pos as usize] as u8));
+    //     while ((loc + 1) % 4) != 0 {
+    //         loc+=1;
+    //     }
+    //     image_vec[loc as usize] = 255;
+    //     pos+=1;
+    // }
+    // let mut a = vec![];
+    // for i in 0..image_vec.len() {
+    //     if (i % 4 == 0) && (i != 0) {
+    //         a.push(vec![image_vec[i - 4], image_vec[i - 3], image_vec[i - 2], image_vec[i-1]]);
+    //     }
+    //     if i > 263998 * 4 {
+    //         println!("{}", i)
+    //     }
+    // }
+    // println!("{}", a.len());
+    // let mut num = 0;
+    // for (x, y, _) in input.pixels()  {
+    //     // let b = &a[num];
+    //     // output.put_pixel(x, y, Rgba([b[0], b[1], b[2], b[3]]));
+    //     num+=1;
+    // }
+    // println!("{}", num);
     // for i in 0..image_vec.len() {
     //     let (x, y, rgba) = image_vec[i];
     //     if (i < messageBits.len()) {
@@ -102,11 +122,13 @@ fn get_next_location(history: &mut Vec<u32>, total: u32) -> i32 {
     let pos = history.len();
     let mut loc = ((pos + 1) as i32).abs() % total as i32;
     loop {
-        if (loc >= total as i32) {
+        if loc >= total as i32 {
             loc = 0;
         } 
         else if history.binary_search(&(loc as u32)).is_ok() {
-            loc = loc + 1;
+            loc += 1;
+        } else if ((loc + 1) % 4) == 0 {
+            loc += 1;
         } else {
             history.push(loc as u32);
             return loc;

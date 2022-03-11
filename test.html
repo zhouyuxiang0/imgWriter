@@ -60,22 +60,25 @@
     }
 
     function encodeMessage(colors, message) {
-        console.log(colors);
+        // console.log(colors);
         let messageBits = getBitsFromNumber(message.length)
-        console.log('长度：', messageBits);
+        // console.log('长度：', messageBits);
         messageBits = messageBits.concat(getMessageBits(message))
-        console.log('整体',messageBits);
+        // console.log('整体',messageBits);
         const history = []
         let pos = 0
+        console.log(messageBits.length, '---------');
         while (pos < messageBits.length) {
-            console.log(pos, messageBits.length);
             let loc = getNextLocation(history, colors.length)
-            console.log(`将下标 ${pos} 值 ${messageBits[pos]} 写入 下标 ${loc} 的 ${colors[loc]} 设置为 ${setBit(colors[loc], 0 , messageBits[pos])}`);
+            // console.log(`将下标 ${pos} 值 ${messageBits[pos]} 写入 下标 ${loc} 的 ${colors[loc]} 设置为 ${setBit(colors[loc], 0 , messageBits[pos])}`);
+
+            console.log(`loc:getNextLocation(${history}, ${colors.length}) =`,  loc, 'pos =', pos);
+            console.log(`setBit(${colors[loc]}, 0, ${messageBits[pos]})`, '=', setBit(colors[loc], 0, messageBits[pos]));
             colors[loc] = setBit(colors[loc], 0 , messageBits[pos])
             while ((loc + 1) %4 !== 0) {
                 loc++
             }
-            console.log(`将下标 ${loc} 的 ${colors[loc]} 修改为 255`);
+            // console.log(`将下标 ${loc} 的 ${colors[loc]} 修改为 255`);
             colors[loc] = 255
             pos++
         }
@@ -106,6 +109,7 @@
     function getNextLocation(history, total) {
         let pos = history.length
         let loc = Math.abs(pos + 1) % total
+        console.log(`compute Math.abs(${pos} + 1) % ${total} = `,loc);
         while(true) {
             if (loc >= total) {
                 loc = 0
@@ -115,12 +119,14 @@
                 loc++
             } else {
                 history.push(loc)
+                console.log('inner loc:', loc);
                 return loc
             }
         }
     }
 
     function setBit(number, location, bit) {
+        console.log('(number & ~(1 << location)) | (bit << location) = ', (number & ~(1 << location)) | (bit << location));
         return (number & ~(1 << location)) | (bit << location)
     }
 
