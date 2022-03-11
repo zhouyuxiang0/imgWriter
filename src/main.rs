@@ -1,38 +1,74 @@
+extern crate image;
+
 use image::{GenericImageView, Rgba, Rgb};
 
-extern crate image;
 
 fn main() {
     let msg = "隐藏文字";
-    let s = String::from(msg);
-    for c in msg.chars() {
-        println!("{}", c as u32)
-    }
-    // byte2Bin(msg);
+    let message_bits = vec![get_bit_from_num(msg.chars().count() as u32), get_msg_bit(&msg)].concat();
     let path = "input1.jpg";
     let input = image::open(path).unwrap();
     let (width, height) = input.dimensions();
     let mut output: image::RgbaImage = image::ImageBuffer::new(width, height);
-    // encode_msg(&input.pixels(), msg);
-    // println!("{:?}", input.pixels());
-    for mut i in input.pixels() {
-        i.2 = Rgba([i.2[0], i.2[1], i.2[3], i.2[4]]);
-        println!("{:?}", i.2);
+    let mut image_vec: Vec<u8> = vec![];
+    // let mut output_image_vec = vec![];
+    for (_, _, rgba) in input.pixels() {
+        image_vec = vec![image_vec, rgba.0.to_vec()].concat();
     }
-    encode_msg(&mut input.pixels().collect(), msg);
-    input.save(path.replace(".", "-out.")).unwrap();
+    println!("{:?}", &image_vec[0..20]);
+    let mut history: Vec<u32> = vec![];
+    let mut pos = 0;
+    while pos < message_bits.len() {
+        let mut loc = get_next_location(&mut history, image_vec.len() as u32);
+        image_vec[loc as usize] = set_bit(&(image_vec[loc as usize] as u8), &0, &(message_bits[pos as usize] as u8));
+        while ((loc + 1) % 4) != 0 {
+            loc+=1;
+        }
+        image_vec[loc as usize] = 255;
+        pos+=1;
+    }
+    println!("{:?}", &image_vec[0..20]);
+    // for i in 0..image_vec.len() {
+    //     let (x, y, rgba) = image_vec[i];
+    //     if (i < messageBits.len()) {
+    //         let a = set_bit(&rgba.0[2], &0, &(messageBits[i] as u8));
+    //         output_image_vec.push((x, y, Rgba([rgba.0[0], rgba.0[1], a, rgba.0[3]])));
+    //     } else {
+    //         output_image_vec.push((x, y, rgba));
+    //     }
+    // }
+    // image_vec[0..20].iter().for_each(|x| println!("{:?}", x));
+    // println!("------------");
+    // output_image_vec[0..20].iter().for_each(|x| println!("{:?}", x))
+    // for index in 0..messageBits.len() {
+    //     // let a = inputPixels;
+    // }
+    
+    // byte_to_bin(msg.as_bytes());
+    // let path = "input1.jpg";
+    // let input = image::open(path).unwrap();
+    // let (width, height) = input.dimensions();
+    // let mut output: image::RgbaImage = image::ImageBuffer::new(width, height);
+    // encode_msg(&input.pixels(), msg);
+    // println!("{:?}", input.get_pixel(0, 0));
+    // for (x, y, mut rgba) in input.pixels() {
+    //     // i.2 = Rgba([i.2[0], i.2[1], i.2[3], i.2[4]]);
+    //     output.put_pixel(x, y, Rgba([rgba.0[0], rgba.0[1], rgba.0[2], rgba.0[3]]))
+    // }
+    // encode_msg(&mut input.pixels().collect(), msg);
+    // input.save(path.replace(".", "-out.")).unwrap();
     // output.save(path.replace(".", "-out.")).unwrap();
 }
 
 fn encode_msg(colors: &mut Vec<(u32, u32, Rgba<u8>)>, msg: &str) {
-    let msgBits = vec![get_bit_from_num(msg.len() as u32), get_msg_bit(msg)].concat() ;
+    let msg_bits = vec![get_bit_from_num(msg.len() as u32), get_msg_bit(msg)].concat() ;
     let mut history = vec![];
     let mut pos = 0;
-    while pos < msgBits.len() {
+    while pos < msg_bits.len() {
         let mut loc = get_next_location(&mut history, colors.len() as u32);
         // colors[0];
-        let mut  targetRgba = &colors[loc as usize].2;
-        targetRgba = &Rgba([targetRgba[0], targetRgba[1], targetRgba[2], targetRgba[3]]);
+        let mut  target_rgba = &colors[loc as usize].2;
+        target_rgba = &Rgba([target_rgba[0], target_rgba[1], target_rgba[2], target_rgba[3]]);
         while (loc + 1) % 4 != 0 {
             loc = loc + 1;
         }
@@ -78,7 +114,7 @@ fn get_next_location(history: &mut Vec<u32>, total: u32) -> i32 {
     }
 }
 
-fn byte2Bin(b: &[u8]) {
+fn byte_to_bin(b: &[u8]) {
     for bit in b {
         println!("{}", bit);
     }
